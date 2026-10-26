@@ -1,0 +1,181 @@
+# design-with-claude
+
+## Project Overview
+**V2 alpha live (April 2026):** subscription product that configures Claude Code for designers via an MCP server, paired with a browser companion that renders command outputs live.
+- Live web: https://www.designwithclaude.com (start at `/get-started`)
+- npm package: `dwic-audit` (run: `npx dwic-audit@1.0.0-alpha.11`). Older names `@imrandwc/dwic` + `designwithclaude` are deprecated pointers to it — still owned, do not unpublish. Bare `dwic` unscoped is unpublishable (npm typosquat filter vs swig/twig).
+- Persistence: Supabase (profiles + companion_events)
+- See `PROGRESS.md` at the repo root for current state; `00-product-brief.md` + `0{1,2,3,4}-*.md` on Desktop for the canonical plan.
+
+**V1 (still shipping):** 40+ specialized design skills as Claude Code slash commands, available as a plugin or standalone. `commands/*.md` stays intact — the V2 MCP server reuses those files as role prompts.
+
+## Architecture
+- **V2 MCP server (root):** TypeScript, ESM, `@modelcontextprotocol/sdk` over stdio. Tools live in `src/tools/`. Shared types in `src/tools/types.ts`. Six structured output kinds: palette, type-scale, spacing, component-spec, copy, markdown.
+- **V2 install flow:** `npx dwic-audit@1.0.0-alpha.11 setup --token=imr_xxx [--scope=user|project]` writes the MCP entry. Uses `claude mcp add-json` when available, falls back to direct `~/.claude.json` edit with timestamped backup, or `.mcp.json` at the cwd for project scope.
+- **V2 gating:** Pre-call `/api/gating/check`, post-call `/api/gating/consume`. Fails open when `DWC_GATING` is off (dev/alpha default).
+- **V2 events:** Post-call emit to `/api/events`. Payload shape defined in `src/api-client.ts` → `EventPayload`. The browser companion (Phase 2) subscribes via Supabase Realtime.
+- **V1 plugin (unchanged):** `.claude-plugin/plugin.json` manifest; `commands/*.md` are the knowledge base for both V1 slash commands and V2 MCP tool role prompts. `/design-brief` is the master command.
+
+## Key Files
+- `package.json` (root) — npm package `dwic-audit`, bins: `dwic-audit` → `dist/bin/setup.js` (the `npx dwic-audit@1.0.0-alpha.11` entry — a dispatcher: bare/flag-first runs an audit, `setup`/`uninstall`/`help`/`version` route explicitly) + `dwic-mcp-server` → `dist/server.js` (MCP server, launched by the installed `.mcp.json` via `npx -p dwic-audit@<v> dwic-mcp-server`)
+- `src/server.ts` — MCP server main; registers all tools; wraps handlers with gating + event emission
+- `src/tools/index.ts` — tool registry
+- `src/tools/types.ts` — `ToolDefinition`, `ToolResult`, output payload types
+- `src/tools/loadPrompt.ts` — reads and caches `commands/*.md` role prompts
+- `src/bin/setup.ts` — `npx dwic-audit@1.0.0-alpha.11 setup` install flow
+- `scripts/test-mcp-handshake.mjs` — stdio round-trip against `dist/server.js` (`npm run test:mcp`)
+- `scripts/test-setup-dry-run.mjs` — install/uninstall against a tmp project (`npm run test:setup`)
+- `.claude-plugin/plugin.json` — V1 plugin manifest (unchanged)
+- `.claude-plugin/marketplace.json` — V1 marketplace catalog (unchanged)
+- `commands/*.md` — role prompts, shared by V1 slash commands and V2 MCP tools
+- `README.md` — V1 install + command reference (still current for the plugin path)
+- `web/` — landing page; will become the V2 browser companion (Phase 2)
+- `web/lib/dwc/{types,tokens,store}.ts` — shared types + in-memory store (Symbol.for singleton survives HMR) that Phase 3 will port to Supabase
+- `web/app/api/tokens/validate`, `web/app/api/gating/{check,consume}`, `web/app/api/events`, `web/app/api/events/recent` — dwc API stubs consumed by the MCP server and the Phase 2 companion
+- `web/app/api/profile/route.ts` — POST mints `imr_` tokens + stores onboarding answers + returns generated CLAUDE.md; GET returns stored profile
+- `web/app/{start,profile,install,companion,upgrade}/page.tsx` — V2 companion flow pages (5 screens)
+- `web/components/companion/` — `Shell`, `CopyButton`, `StartWizard`, `CompanionView`, plus `renderers/{Palette,TypeScale,Spacing,ComponentSpec,Copy,Markdown}Renderer.tsx` + barrel `renderers/index.tsx`
+- `web/lib/claude-md-generator.ts` — extended with `tone_preference` for the V2 flow
+- `web/lib/dwc/supabase.ts` — lazy service_role Supabase client (server-side only; RLS blocks anon)
+- `web/lib/dwc/store.ts` — async store; dispatches to Supabase when `DWC_SUPABASE_URL` + `DWC_SUPABASE_SERVICE_ROLE_KEY` are set, in-memory Map fallback otherwise
+- `web/supabase/{schema.sql,SETUP.md}` — schema + 5-step user setup doc for Supabase project + Vercel env
+
+## Command File Structure
+
+**Read `docs/SKILL-QUALITY-STANDARD.md` before writing or editing a command.** It is the
+bar every command is held to, and it doubles as the build spec for new ones.
+
+New commands follow the shape of `commands/design-grill.md` or `commands/design-triage.md`:
+an evidence rule, a "skip this command when" block, a step-by-step procedure, a literal
+output template, and a falsifiable "done when" condition.
+
+The **legacy six-section template** below is what ~35 older commands still use. A
+2026-08-14 audit of all 46 found it violates seven of the ten quality rules by
+construction — no output format, no end condition, no skip rule, no severity cap, and it
+states every rule three times (Guidelines, then Checklist, then Anti-patterns), which is
+what let numeric thresholds drift apart inside a single file. **Do not use it for new
+commands.**
+
+```
+## Expertise / ## Design Principles / ## Guidelines
+## Checklist / ## Anti-patterns / ## How to respond / ## What to ask if unclear
+```
+
+Do NOT bulk-delete those sections from existing files: several use the Checklist as their
+only stop condition, and some Anti-patterns (e.g. `motion-designer`'s `transition: all`)
+are more actionable than the prose they appear to duplicate.
+
+## Counts are generated, never typed
+
+Skill counts appear in seven places and had drifted to four different numbers. Run
+`npm run sync-counts` after adding or removing a command; `npm run build` fails on stale
+counts. Never hand-edit a count.
+
+## Card descriptions are generated, never typed
+
+The library card on `web/app/data/skills.ts` is derived from the **first sentence** of the
+matching `commands/<slug>.md` description. Run `npm run sync-skill-descriptions` after
+editing any description; `npm run build` fails on drift, on a first sentence over 121
+characters, and on a command with no card or a card with no command. Never hand-edit a
+card description — the two copies silently diverged the moment one side changed.
+
+Every description is written as two sentences: the symptom (which becomes the card), then
+the concrete situations (which only Claude reads).
+
+## Naming Convention
+Specialists use pure role-based names (`accessibility-specialist`, `motion-designer`).
+The `design-` prefix marks commands that act on the design *process* rather than a domain:
+`design-brief`, `design-system-architect`, `design-critic`, `design-grill`, `design-triage`.
+
+## Known Issues & Learnings
+
+- **The agent cannot see.** Commands must never instruct it to judge rendered appearance
+  or runtime metrics from source. Every design command carries `## The evidence rule`;
+  keep it when editing, and mark unrenderable claims `unverified — needs rendering`.
+- **MCP tool names and slash command names differ for spacing.** The MCP tool is
+  `spacing-specialist`; the slash command is `/spacing-layout-specialist`. The audit
+  report's "Next steps" names the MCP tool, which free-library users do not have.
+- **`commands/*.md` backs both products.** The same file powers the free slash command
+  and the paid MCP specialist, so a command edit changes both.
+- **Anything under `commands/` ships as a user-visible command.** Shared partials cannot
+  live there — `commands/_shared/x.md` would appear as `/design-with-claude:_shared:x`.
+- **Run the thing before believing it.** A 25-agent read of all 46 command files found no
+  runtime bugs. The first end-to-end CLI run found one in 20 minutes (`dwic audit <path>`
+  silently auditing the cwd). Reading prompts is not testing behaviour.
+- **A command's mutating tail is where defects hide.** The reporting half gets the
+  scrutiny; the "then fix" step appended after it inherits none of it. `/design-enforce`
+  shipped able to replace a whole component with no checkpoint, and its "not violations"
+  list contradicted the fixture it was built against — both in the tail, both missed by
+  reading, both found in one run. When auditing a command, read its last section first.
+- **Two fixtures, two jobs.** `examples/broken-project` has *broken tokens* and exercises
+  `dwic audit`. `examples/detached-values` has *sound tokens the code ignores* and
+  exercises `/design-enforce`. The audit reports the second one clean — that contrast is
+  the point, so don't "fix" its tokens. Its expected findings live in
+  `examples/detached-values/EXPECTED.md`, deliberately *outside* the code under test —
+  don't move them back into a comment, or the fixture stops being able to fail.
+- **`markupContent` is raw source, not markup.** The aggregator hands whole `.tsx` files
+  to the a11y, form, nav and copy checks. Tag-anchored checks are safe on that; anything
+  reading the *remainder* is not, because outside `<...>` a component is comments,
+  imports and type annotations rather than user copy. That assumption shipped a bug that
+  audited code as prose. If you add a check that reads text rather than tags, it needs
+  `runContentAudit(..., { source: true })`-style extraction, and a test proving both that
+  code isn't flagged and that real copy still is.
+- **Gitignored continuity files are invisible from worktrees.** `docs/SESSION-LOG.md` and
+  `PROGRESS.md` are gitignored to keep them out of the public repo, so they don't
+  propagate into `.claude/worktrees/*`. A session working in a worktree sees no project
+  state and may create its own copy, which dies with the worktree — this already cost one
+  recovery. Read and write both only at the main checkout.
+- **Publishing needs `npm publish --tag latest`.** Every release is a prerelease
+  (`1.0.0-alpha.N`), so a bare `npm publish` is rejected outright — npm demands an explicit
+  tag. The trap is the recovery: `--tag alpha` succeeds and looks fine, but `latest` keeps
+  pointing at the old version, so `npx dwic-audit@1.0.0-alpha.11` and every generated `.mcp.json` keep
+  serving the release you were trying to replace. Check `npm view dwic-audit dist-tags`
+  before and after, and verify with `npx -y dwic-audit@1.0.0-alpha.11 version`, not `npm view` alone —
+  the registry view is cached and lags a publish by minutes.
+- **The version lives in four files and is generated.** `package.json` plus three TS
+  constants (`src/server.ts`, `src/bin/audit.ts`, `src/bin/setup.ts`). Bump `package.json`,
+  then run `npm run sync-version`; `npm run build` fails on drift. Never hand-edit the
+  constants — `setup.ts`'s copy is written into the user's `.mcp.json` as
+  `npx -p dwic-audit@<VERSION>`, so a stale one pins installs to a release that was never
+  shipped, with no error anywhere.
+- **Plugin text must pin every package it runs.** Anthropic's plugin directory blocked 1.0.5
+  (review 2026-10-06) because commands and skills ran dwic-audit, vercel and other packages
+  through npx with no version. Write `pkg@x.y.z` everywhere in `commands/`, `skills/`, `.claude-plugin/`,
+  the README and this file. `npm run sync-version` rewrites every `dwic-audit@<v>` to the
+  package version and the build fails on an unversioned dwic-audit run; third-party tools
+  (`vercel`, `skills`, `kill-port`) are pinned by hand. This file lives in `.claude/` rather
+  than the repo root because the repo root is the plugin root, where a CLAUDE.md is not
+  loaded and the directory scan warns about it.
+- **The plugin version is cached per-version on disk.** Claude Code stores each install
+  under `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/` — the path literally
+  contains the number — and skips any plugin whose resolved version matches what the user
+  already has. Pushing new commits to `main` without bumping `version` in
+  `.claude-plugin/{plugin,marketplace}.json` therefore serves installers the old build, with
+  no error anywhere. It sat at 1.0.4 through three merges before that was noticed. Bump it on
+  every release that touches `commands/`, and verify by installing from the *published*
+  marketplace in a clean directory — the repo being right proves nothing about what users get.
+- **`/plugin install` does not switch a plugin on — `/reload-plugins` does.** Claude Code's
+  own string is "Run /reload-plugins to activate successfully installed plugins." Skip that
+  line and the commands simply do not exist, silently, for everyone at once. Any install
+  instructions we hand out (README, onboarding copy, workshop slides) need all three lines:
+  marketplace add, install, reload.
+- **A command's `description` is its entire trigger surface.** Every `commands/*.md`
+  carries only `description` in frontmatter and none set `disable-model-invocation`, so
+  every one is model-invocable and that one line is all Claude reads when deciding whether
+  to reach for a skill. A description that names a topic ("Cart UX, payment forms") tells
+  it what the command is *about* but never *when* to fire, so it mostly does not. Lead
+  with the symptom the user is actually experiencing. All 48 were rewritten this way on
+  2026-08-21; the same change took an aiex skill pack from 0/4 to 3/3 on trigger tests.
+  **Firing here is still unmeasured** — there is no eval suite, so treat it as
+  well-founded rather than proven until `claude plugin eval` cases exist.
+- **"senior" stays in two role prompts on purpose.** The product is *"a product designer
+  inside your terminal"* — "senior" was dropped because both target audiences hold that AI
+  tools are junior-level, so claiming it invites the one objection you cannot argue with,
+  and it contradicts the evidence rule above. But `anti-slop-designer.md` and
+  `design-grill.md` open with "You are a senior designer": there the word sets the agent's
+  judgment level and does real work in the prompt. Don't "fix" those for consistency.
+
+## Session History
+
+Full per-session history lives in **`docs/SESSION-LOG.md`** (not auto-loaded, to keep this file lean).
+`/save` appends a terse summary there. Read it only when you need historical context.

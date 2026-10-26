@@ -1,0 +1,30 @@
+/* The design system for this fixture. Unlike examples/broken-project, whose
+   tokens are broken to exercise `dwic audit`, everything here is sound:
+   AA-passing colours, a clean 4px scale, standard weights. Do not change it. */
+
+:root {
+  /* colour */
+  --color-primary: #1f3b90;
+  --color-warning: #f79009;
+  --color-success: #027a48;
+  --color-text: #101828;
+  --color-surface: #ffffff;
+
+  /* spacing — 4px scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+
+  /* type */
+  --font-size-body: 16px;
+  --font-size-h1: 32px;
+  --font-weight-body: 400;
+  --font-weight-bold: 700;
+}

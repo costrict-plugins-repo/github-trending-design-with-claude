@@ -1,0 +1,87 @@
+{
+  "name": "dwic-audit",
+  "version": "1.0.0-alpha.11",
+  "description": "dwic — a product designer inside your terminal. MCP server + CLI that audits your design tokens + markup for WCAG contrast failures, mandated-accent drift, and structural gaps, then remembers findings across sessions.",
+  "type": "module",
+  "main": "./dist/server.js",
+  "bin": {
+    "dwic-audit": "dist/bin/setup.js",
+    "dwic-mcp-server": "dist/server.js"
+  },
+  "files": [
+    "dist",
+    "commands",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/sync-counts.mjs --check && node scripts/sync-version.mjs --check && node scripts/sync-skill-descriptions.mjs --check && tsc && node scripts/chmod-bins.mjs",
+    "sync-version": "node scripts/sync-version.mjs",
+    "sync-counts": "node scripts/sync-counts.mjs",
+    "check-counts": "node scripts/sync-counts.mjs --check",
+    "sync-skill-descriptions": "node scripts/sync-skill-descriptions.mjs",
+    "check-skill-descriptions": "node scripts/sync-skill-descriptions.mjs --check",
+    "dev": "tsc --watch",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "test:mcp": "node scripts/test-mcp-handshake.mjs",
+    "test:anonymous-events": "node scripts/test-anonymous-events.mjs",
+    "test:explicit-asks": "node scripts/test-explicit-asks.mjs",
+    "test:audit-mode": "node scripts/test-audit-mode.mjs",
+    "test:audit-color-roles": "node scripts/test-audit-color-roles.mjs",
+    "test:audit-typography": "node scripts/test-audit-typography.mjs",
+    "test:audit-spacing": "node scripts/test-audit-spacing.mjs",
+    "test:audit-dsa": "node scripts/test-audit-dsa.mjs",
+    "test:memory-context": "node scripts/test-memory-context.mjs",
+    "test:audit-accessibility": "node scripts/test-audit-accessibility.mjs",
+    "test:audit-form-designer": "node scripts/test-audit-form-designer.mjs",
+    "test:audit-navigation-specialist": "node scripts/test-audit-navigation-specialist.mjs",
+    "test:audit-content-strategist": "node scripts/test-audit-content-strategist.mjs",
+    "test:audit-copy-source": "node scripts/test-audit-copy-source.mjs",
+    "test:audit-motion-designer": "node scripts/test-audit-motion-designer.mjs",
+    "test:detect-project-config": "node scripts/test-detect-project-config.mjs",
+    "test:audit-walker": "node scripts/test-audit-walker.mjs",
+    "test:audit-aggregator": "node scripts/test-audit-aggregator.mjs",
+    "test:audit-dashboard": "node scripts/test-audit-dashboard.mjs",
+    "test:audit-drift": "node scripts/test-audit-drift.mjs",
+    "test:markup-utils": "node scripts/test-markup-utils.mjs",
+    "test:audit-markdown-report": "node scripts/test-audit-markdown-report.mjs",
+    "test:audit-cli-e2e": "node scripts/test-audit-cli-e2e.mjs",
+    "test:onboarding-gate": "node scripts/test-onboarding-gate.mjs",
+    "test:setup": "node scripts/test-setup-dry-run.mjs",
+    "test:e2e": "node scripts/test-e2e-roundtrip.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "dwic",
+    "design-with-claude",
+    "claude-code",
+    "mcp",
+    "mcp-server",
+    "design-system-audit",
+    "accessibility-audit",
+    "wcag-contrast-checker",
+    "design-tokens",
+    "design",
+    "design-system",
+    "designer-tools"
+  ],
+  "author": "imsaif",
+  "license": "MIT",
+  "homepage": "https://designwithclaude.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imsaif/design-with-claude.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0"
+  }
+}

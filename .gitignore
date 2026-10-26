@@ -1,0 +1,63 @@
+node_modules/
+.next/
+.vercel/
+*.log
+.env*
+.DS_Store
+web/lib/agents/commands/
+dist/
+tsconfig.tsbuildinfo
+.mcp.json
+.clerk/
+.dwic/
+.audit-findings/
+
+# Unpublished Design Research drafts + raw corpus (headed to Medium / a gist,
+# not the public product repo). The /design-research pages are the public home.
+docs/bootcamp-study-*.md
+docs/study-corpus-*.md
+
+# Internal working docs (kept local, not published to the public repo)
+/PROGRESS.md
+/DISTRIBUTION.md
+/FIELD_NOTES_COGNITION.md
+/FIELD_NOTES_PORTFOLIO.md
+/ROADMAP_AUDIT_CLI.md
+/ROADMAP_FROM_COGNITION.md
+/docs/SESSION-LOG.md
+/docs/superpowers/
+
+# Local research scratch (HN/Reddit scrapes, scratch HTML, one-off scripts).
+# Untracked deliberately - see the stray-file cleanup commit.
+.firecrawl/
+*.html
+!web/**/*.html
+hn*.py
+hn*_out.txt
+hn_*.json
+flat*.py
+flat_*.txt
+harvest*.py
+harvest*_out.txt
+sad*.txt
+sad*.html
+rd*.py
+reddit_out.txt
+chains*.txt
+urls.txt
+ux1.txt
+j1.txt
+j2.txt
+veluthoor_readme.md
+
+# One-off research scrapers and their output. Kept locally, never shipped:
+# the plugin source is the whole repo, so anything tracked here lands in a
+# stranger's install.
+chain.py
+check.py
+dig.py
+filt.py
+craft_dedup.txt
+fig.txt
+filtered.txt
+iter_out.txt
