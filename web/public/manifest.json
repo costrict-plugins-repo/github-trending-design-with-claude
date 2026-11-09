@@ -1,0 +1,23 @@
+{
+  "name": "dwic — the design auditor inside Claude Code",
+  "short_name": "dwic",
+  "description": "dwic (design with claude) — MCP server that audits your design system tokens for contrast failures, brand drift, and structural gaps, then prescribes the fix across Claude Code sessions.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/favicon-light.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-transparent.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

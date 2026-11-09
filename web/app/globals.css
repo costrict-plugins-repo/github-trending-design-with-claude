@@ -1,0 +1,241 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+ * aiex design system — light-default palette, navy accent.
+ * Ported from /Users/imranmohammed/aiex/src/app/globals.css.
+ * Existing dwic CSS references (var(--text), var(--accent), var(--surface)…)
+ * remain valid via the alias block below — the cascade does the heavy lifting
+ * across the 1900-line skills.css without per-class edits.
+ * ------------------------------------------------------------------------- */
+
+:root {
+  /* aiex tokens — light theme */
+  --background-primary: #ffffff;
+  --background-secondary: #fafafa;
+  --background-tertiary: #f5f5f5;
+  --background-grain: #F0F1F5;
+  --surface-primary: #ffffff;
+  --surface-secondary: #f9f9f9;
+  --surface-elevated: #ffffff;
+  --text-primary: #162036;
+  --text-secondary: #20294C;
+  --text-tertiary: #64748b;
+  --text-disabled: #94a3b8;
+  --text-hero: #162036;
+  --border-primary: #e5e7eb;
+  --border-secondary: #d1d5db;
+  --border-focus: #525252;
+  --border-success: #10b981;
+  --border-error: #ef4444;
+  --border-warning: #f59e0b;
+  --border-info: #3b82f6;
+  --border-interactive: #3b82f6;
+  --border-interactive-hover: #2563eb;
+  --border-selected: #3b82f6;
+  --border-disabled: #d1d5db;
+  --border-divider: #f9f9f9;
+  --border-divider-subtle: #fcfcfc;
+  --ring-focus: #3b82f6;
+  --ring-focus-error: #ef4444;
+  --ring-focus-success: #10b981;
+  --ring-focus-warning: #f59e0b;
+  --accent-primary: #162036;
+  --accent-hover: #1e2a42;
+  --accent-subtle: #f5f5f5;
+
+  /* Shadow + motion tokens (aiex). */
+  --shadow-subtle: 0 2px 8px rgba(51, 65, 85, 0.04);
+  --shadow-card: 0 4px 12px rgba(51, 65, 85, 0.05);
+  --shadow-card-hover: 0 8px 24px rgba(51, 65, 85, 0.08);
+  --shadow-elevated: 0 12px 32px rgba(51, 65, 85, 0.1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Radii. Existing 10/6 values stay for cards; 999 for pills. */
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-pill: 999px;
+
+  /* --- Backward-compat aliases for the legacy dwic skills.css ---- */
+  --background: var(--background-primary);
+  --bg: var(--background-primary);
+  --foreground: var(--text-primary);
+  --text: var(--text-primary);
+  --text-muted: var(--text-secondary);
+  --text-dim: var(--text-tertiary);
+  --surface: var(--surface-primary);
+  --surface-hover: var(--surface-secondary);
+  --border: var(--border-primary);
+  --border-accent: var(--border-secondary);
+  --accent: var(--accent-primary);
+  --accent-dim: rgba(22, 32, 54, 0.12);
+  --accent-dim2: rgba(22, 32, 54, 0.06);
+}
+
+/* aiex dark mode (data-attribute toggle, no UI yet). Reserved for a future
+ * theme toggle — body data-theme="dark" flips every alias automatically. */
+[data-theme="dark"] {
+  --background-primary: #0f0f0f;
+  --background-secondary: #171717;
+  --background-tertiary: #1f1f1f;
+  --background-grain: #1a1a1a;
+  --surface-primary: #171717;
+  --surface-secondary: #1f1f1f;
+  --surface-elevated: #262626;
+  --text-primary: #fafafa;
+  --text-secondary: #d4d4d4;
+  --text-tertiary: #a3a3a3;
+  --text-disabled: #737373;
+  --text-hero: #fafafa;
+  --border-primary: #374151;
+  --border-secondary: #4b5563;
+  --accent-primary: #ffffff;
+  --accent-hover: #f5f5f5;
+  --accent-subtle: #262626;
+  --accent-dim: rgba(255, 255, 255, 0.12);
+  --accent-dim2: rgba(255, 255, 255, 0.06);
+}
+
+@theme inline {
+  --color-background: var(--background-primary);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-satoshi);
+}
+
+/* Font aliases. Legacy CSS still references --font-dm-sans, --font-dm-serif,
+ * --font-dm-mono; map them all to Satoshi so nothing renders in Times. */
+:root {
+  --font-dm-sans: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  --font-dm-serif: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  --font-dm-mono: ui-monospace, "SF Mono", Monaco, "Fira Code", monospace;
+  --font-geist-sans: var(--font-satoshi);
+  --font-geist-mono: ui-monospace, "SF Mono", Monaco, monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Always reserve space for the vertical scrollbar so the viewport width
+     doesn't shift when page height crosses viewport height mid-interaction. */
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  scroll-padding-top: 100px;
+}
+
+body {
+  background: var(--background-primary);
+  color: var(--text-primary);
+  font-family: var(--font-satoshi), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+}
+
+code {
+  font-family: ui-monospace, "SF Mono", Monaco, Inconsolata, "Fira Code",
+    monospace;
+}
+
+/* aiex typographic refinements */
+h1, h2, h3, h4, h5, h6 {
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+h1 {
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h3, h4 {
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+p {
+  line-height: 1.6;
+}
+
+/* Remove focus outline for mouse users, keep for keyboard users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring-focus);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+::selection {
+  background: rgba(22, 32, 54, 0.15);
+  color: var(--text-primary);
+}
+
+/* Scrollbar — light, subtle */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 6px;
+  border: 2px solid var(--background-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+@supports (backdrop-filter: blur(20px)) {
+  .backdrop-blur-custom {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+}
+
+/* Skip link — visually hidden until keyboard focus, then surfaces in
+ * top-left so screen-reader/keyboard users can bypass the nav. */
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  z-index: 100;
+  padding: 0.65rem 1rem;
+  background: var(--accent-primary);
+  color: #ffffff;
+  font-family: var(--font-satoshi), sans-serif;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  border-radius: 8px;
+  transform: translateY(-150%);
+  transition: transform 180ms var(--ease-expo);
+}
+
+/* Only show on keyboard navigation. `:focus` (without -visible) was firing
+ * for mouse users on bfcache restore + page-load auto-focus. */
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--ring-focus);
+  outline-offset: 2px;
+}
