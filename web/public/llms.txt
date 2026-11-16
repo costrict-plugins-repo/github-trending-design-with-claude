@@ -1,0 +1,56 @@
+# dwic — design with claude
+
+> dwic ("dwick", d + wi + c = design with claude) is a design auditor that runs inside Claude Code. An MCP server + CLI for code-first designers: audit your design system, preserve intent across sessions, and catch drift before it ships.
+
+## What it is
+
+dwic is distributed as the npm package `dwic`. Install it once, and Claude Code gains 14 design specialists that can audit or generate palettes, type scales, spacing ramps, component specs, copy, motion, and accessibility wiring. A persistent project profile (framework, stack, design system, tone) lives at designwithclaude.com so audits stay grounded in your actual system.
+
+A zero-friction CLI audit is available — no install, no account:
+
+```
+npx dwic-audit
+```
+
+Scans the current project, runs 8 audit categories (color, typography, spacing, accessibility, form, navigation, motion, copy), prints a severity-sorted dashboard, writes a shareable report to `.dwic/audit-<date>.md`. Exit code mirrors severity (0 clean, 1 warn, 2 error) so it slots into CI. A `--watch` flag re-audits on file change for live feedback during development.
+
+## Install (full MCP product)
+
+```
+npx dwic-audit setup --token=imr_xxx --project=<slug>
+```
+
+Get a token by submitting your email at [designwithclaude.com/get-started](https://designwithclaude.com/get-started). The flow is short: email → token → install command + tailored CLAUDE.md for your project.
+
+## Core surfaces
+
+- [Homepage](https://designwithclaude.com/): product overview, interactive audit demo, install flow.
+- [How to design with Claude](https://designwithclaude.com/how-to-design-with-claude): cornerstone guide — the dwic workflow loop (audit → generate → iterate → watch), the 9 specialists, the audit dashboard explained, links into deeper reading. The canonical answer to the brand-name search query.
+- [Get started](https://designwithclaude.com/get-started): email gate; mints your token; returns the install command.
+- [Library](https://designwithclaude.com/library): the V1 free library — 41 role-based design specialists across 8 categories as Claude Code slash commands (standalone or plugin). Separate from the dwic auditor; installable independently.
+
+## MCP tools (13 active)
+
+Audit + generate modes: `color-specialist`, `typography-specialist`, `spacing-specialist`, `design-system-architect`, `accessibility-specialist`, `form-designer`, `navigation-specialist`, `content-strategist`, `motion-designer`.
+
+Generate only: `design-brief`, `setup-guide`, `debug-helper`, `set-project-profile`.
+
+## Product Context
+
+For a structured, AI-readable summary of product intent, audit-flow design decisions, positioning, and what dwic explicitly is *not*:
+
+- [llms.gist](https://designwithclaude.com/llms.gist): Full product context in the `.gist` open format. Mirrors `llms.txt` convention; canonical at the site root.
+
+## Positioning
+
+dwic is the design-engineering rigor layer for code-first designers using Claude Code — audit, drift detection, persistent project memory. It complements canvas tools (including Claude Design) rather than competing with them.
+
+## Links
+
+- npm: https://www.npmjs.com/package/dwic
+- GitHub: https://github.com/imsaif/design-with-claude
+- Related: https://aiuxdesign.guide · https://gist.design
+
+## License
+
+MIT
